@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset=utf-8 />
+	<title>John Snow's 1854 Map</title>
+	<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+	<link rel='icon' href='https://newmapsplus.github.io/favicon.ico' type='image/x-icon' />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+		integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+		crossorigin="" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+
+	<link href="https://fonts.googleapis.com/css?family=Quicksand:400,700" rel="stylesheet">
+
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			font-family: 'Quicksand', sans-serif;
+			font-size: 100%;
+			color: #3d3d3d;
+		}
+
+		h1 {
+			position: absolute;
+			margin-top: 0;
+			top: 10px;
+			left: 15px;
+			font-size: 1.5em;
+			font-family: 'Quicksand', sans-serif;
+			font-weight: 700;
+			letter-spacing: .04em;
+			padding: 10px 15px;
+			/* Add styles to match Leaflet UI elements */
+			background: rgba(256, 256, 256, .3);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			z-index: 800;
+		}
+
+		h2 {
+			font-family: 'Quicksand', sans-serif;
+			font-size: 1.2em;
+			letter-spacing: .04em;
+
+		}
+
+		#map {
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			width: 100%;
+		}
+
+		#about {
+			position: absolute;
+			bottom: 20px;
+			left: 15px;
+			width: 300px;
+			padding: 0 15px;
+			/* Add styles to match Leaflet UI elements */
+			background: rgba(256, 256, 256, 0.64);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+			border: 1px solid #ddd;
+			border-radius: 5px;
+			z-index: 800;
+		}
+
+		p {
+			font-size: .9em;
+			line-height: 1.5em;
+		}
+
+		a {
+			color: #005daa;
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
+		/* Leaflet popup styles */
+		.leaflet-popup-content {
+			font-family: 'Quicksand', sans-serif;
+			font-size: 1.1em;
+		}
+
+		.legend {
+			padding: 6px 8px;
+			font-size: 1em;
+			background: rgba(0, 0, 0, 0.8);
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+			border-radius: 5px;
+		}
+
+		.legend {
+			padding: 6px 8px;
+			font-size: 1em;
+			background: rgba(255, 255, 255, 0.8);
+			box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+			border-radius: 5px;
+		}
+
+		.legend h3 {
+			font-size: 1.1em;
+			font-weight: normal;
+			color: #000000;
+			margin: 0 0 10px 0;
+		}
+
+		.legend span {
+			width: 20px;
+			height: 20px;
+			float: left;
+			margin: 0 10px 4px 0;
+		}
+
+		.legend label {
+			font-size: 1.1em;
+		}
+
+		.legend label:after {
+			content: '';
+			display: block;
+			clear: both;
+		}
+
+		/* 
+		When browser is 900px high or less
+		make the font a little smaller.
+		 */
+		@media screen and (max-height: 400px) {
+
+			#about p,
+			#about h2 {
+				font-size: .6em;
+			}
+
+			h1 {
+				font-size: 1.2em;
+			}
+
+			#about h2 {
+				font-size: 1em;
+			}
+
+			.leaflet-popup-content {
+				font-family: 'Quicksand', sans-serif;
+				font-size: 0.9em;
+			}
+		}
+
+		/* Don't display info block when window is very small */
+		@media screen and (max-height: 200px) {
+
+			#about {
+				display: none;
+			}
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>The Map that made Geospatial History!</h1>
+	<div id='map'></div>
+
+	<section id="about">
+		<h2>About this</h2>
+		<p>"In August of 1854, one of the most terrifying outbreaks of disease in the history of the western world
+			occurred in London, England. Within a single week, 10% of the population of Soho had succumbed to Cholera,
+			and the outbreak only subsided as residents fled in fear." (<a
+				href='https://www.arcgis.com/home/item.html?id=4b8616f29eef4e6683f1f14a1345a5ed'>Esri</a>)
+			<br>
+			<br>
+
+			This map is a visual rendering of Jon Snow's infamous spatial Analysis. Users may <strong>click once
+			</strong> any well once to
+			witness all infected within 35 meters proximity to a well. <strong>Double click</strong> to return to the
+			original view. The data for this map can be found <a href = 'http://blog.rtwilson.com/john-snows-famous-cholera-analysis-data-in-modern-gis-formats/'>here</a>.
+		</p>
+		<p>Author: <a hfre='https://github.com/Oklein1'>Ofir Klein</a></p>
+	</section>
+
+
+	<!-- Libraries -->
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+		integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+		crossorigin=""></script>
+	<!-- Load a Leaflet plugin to provide geolocation. -->
+	<script src="https://cdn.jsdelivr.net/npm/leaflet.locatecontrol/dist/L.Control.Locate.min.js" charset="utf-8">
+	</script>
+
+
+
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://unpkg.com/simple-statistics@7.2.0/dist/simple-statistics.min.js"></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.2/proj4.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.min.js'></script>
+
+	<script src='	https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js'></script>
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.js'></script>
+
+	<script>
+		//data
+		const deathsData = '/data/Cholera_Deaths.geojson'
+		const pumpsData = '/data/Pumps.geojson'
+		var values = []
+
+
+
+		const icon = L.icon({
+			iconUrl: '/images/waterwell.svg',
+			iconSize: [23, 23],
+			popupAnchor: [0, -22],
+			className: "icon"
+		});
+
+		var options = {
+			center: [51.5133, -0.1369],
+			zoom: 16.5,
+			zoomControl: false
+		}
+
+		var locate_options = {
+			position: 'topright',
+			strings: {
+				title: "Show me where I am, yo!"
+			}
+		}
+
+		//projection
+		var map = L.map('map', options);
+
+		// add zoom control to top right window position
+		L.control.zoom({
+			position: 'topright'
+		}).addTo(map);
+
+		// add geolocation control to top right window position (Leaflet can handle multiple top-right elements)
+		L.control.locate(locate_options).addTo(map);
+
+		// Get basemap URL from Leaflet Providers
+		var basemap_url = 'http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png'
+
+		// Get basemap attributes from Leaflet Providers
+		var basemap_attributes = {
+			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
+			subdomains: 'abcd',
+			maxZoom: 19
+		};
+		// requests some map tiles
+		var tiles = L.tileLayer(basemap_url, basemap_attributes);
+
+		map.addLayer(tiles);
+
+		//var message = '<h2>University of Kentucky!</h2>Department of Geography';
+
+
+		function drawMap(dataLayer) {
+			let breaks = getClassBreaks(dataLayer);
+
+			dataLayer.eachLayer(function (layer) {
+
+				let props = layer.feature.properties;
+
+				layer.setStyle({
+					fillColor: getColor(props.Count, breaks)
+				})
+				layer.on('mouseover', function () {
+					layer.bringToFront()
+					layer.setStyle({
+						color: 'yellow',
+						weight: 4
+					})
+				})
+				layer.on('mouseout', function () {
+					layer.bringToBack()
+					layer.setStyle({
+						color: 'red',
+						weight: .6
+					})
+				});
+			})
+			let legend = drawLegend(breaks)
+		}
+
+		function getClassBreaks(dataLayer) {
+
+			dataLayer.eachLayer(function (layer) {
+				var props = layer.feature.properties;
+				var value = props.Count;
+				if (value === null) {
+					//console.log(value)
+				} else {
+					values.push(Number(value));
+				}
+
+
+			});
+
+			var clusters = ss.ckmeans(values, 3);
+
+			let breaks = clusters.map(function (cluster) {
+				return [cluster[0], cluster.pop()];
+			});
+
+			return breaks;
+		}
+
+		function getColor(d, breaks) {
+
+			if (d <= breaks[0][1]) {
+				return '#fee6ce';
+			} else if (d <= breaks[1][1]) {
+				return '#fdbb84';
+			} else if (d <= breaks[2][1]) {
+				return '#e34a33';
+			}
+		}
+
+
+		function drawLegend(breaks) {
+			//console.log(breaks)
+
+			var legend = L.control({
+				position: 'bottomright'
+			});
+
+			legend.onAdd = function () {
+
+				var div = L.DomUtil.create('div', 'legend');
+
+				div.innerHTML = `<h3><strong>Death Counts</strong></h3>`;
+
+				for (var i = 0; i < breaks.length; i++) {
+
+					var color = getColor(breaks[i][0], breaks);
+
+
+					div.innerHTML +=
+						`<span style="background:${color}"></span>
+						<label>${(breaks[i][0]).toLocaleString()}&mdash;
+						${(breaks[i][1]*1).toLocaleString()}</label>`;
+				}
+				return div;
+			};
+			legend.addTo(map);
+		}
+
+		async function loadLayers() {
+			const choleraDeaths = await fetch(deathsData).then(function (res) {
+				return res.json()
+			})
+
+			const pumpsLocations = await fetch(pumpsData).then(function (res) {
+				return res.json()
+			})
+
+			//load deaths layer
+			const deathsLayer = L.geoJson(choleraDeaths, {
+				style: function (feature) {
+					return {
+						color: 'red',
+						fillOpacity: .8,
+						fillColor: 'red'
+					};
+				},
+				pointToLayer: function (feature, latlng) {
+					//console.log(feature)
+					return L.circle(latlng, {
+						color: 'red',
+						weight: 1,
+						fillColor: 'red',
+						fillOpacity: .8,
+						radius: feature.properties.Count
+					})
+				},
+				onEachFeature: function (feature, layer) {
+					let popup =
+						`<strong style="color:black">Death Count:</strong><br> ${feature.properties.Count}`
+					layer.bindTooltip(popup)
+				}
+			}).addTo(map)
+			drawMap(deathsLayer);
+
+			//load pump layer
+			const pumpLayer = L.geoJson(pumpsLocations, {
+				pointToLayer: function (feature, latlng) {
+					//console.log(feature)
+					return L.marker(latlng, {
+						icon: icon
+					})
+				}
+			}).addTo(map)
+
+			let clickedPump = null
+			const popup = L.popup();
+
+			//radius around pump to do standard distance (standard deviation)
+			pumpLayer.on('click', function (i) {
+				if (clickedPump !== i.layer._leaflet_id) {
+					clickedPump = i.layer._leaflet_id
+					const pumpLayer = i.layer
+					const pumpLatlng = i.latlng
+
+					let deathsInBuffer = []
+					let totalDeath = []
+
+					deathsLayer.setStyle(function (deathFeature) {
+						//console.log(deathFeature)
+						const deathLatlng = {
+							lat: deathFeature.geometry.coordinates[1],
+							lng: deathFeature.geometry.coordinates[0]
+						}
+						const distance = pumpLatlng.distanceTo(deathLatlng); // distance as meters
+
+						let opacity = 0
+
+
+						if (distance < 35) {
+							deathsInBuffer.push(deathFeature)
+							opacity = 0.8
+						}
+
+						return {
+							fillOpacity: opacity
+						};
+					})
+
+
+					const sumOfDeaths = deathsInBuffer.reduce(function (sum, point) {
+						sum += point.properties.Count
+						return sum
+					}, 0)
+					//console.log(sumOfDeaths, deathsInBuffer)
+
+					//make popup
+					popup
+						.setLatLng(pumpLatlng)
+						.setContent(`<strong style="color:black">Total deaths:</strong><br> ${sumOfDeaths} 💀`)
+						.addTo(map);
+				} else {
+					clickedPump = null
+					deathsLayer.setStyle(function (deathFeature) {
+						const opacity = 0.8
+						return {
+							fillOpacity: opacity
+						};
+					})
+
+					//close popup
+					popup.closePopup()
+				}
+			})
+
+
+
+		}
+
+		loadLayers()
+	</script>
+
+</body>
+
+</html>
