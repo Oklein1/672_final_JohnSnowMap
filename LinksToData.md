@@ -1,0 +1,1 @@
+1. http://blog.rtwilson.com/john-snows-famous-cholera-analysis-data-in-modern-gis-formats/
