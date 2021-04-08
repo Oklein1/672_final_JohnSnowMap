@@ -174,8 +174,8 @@
 		<h2>About this</h2>
 		<p>"In August of 1854, one of the most terrifying outbreaks of disease in the history of the western world
 			occurred in London, England. Within a single week, 10% of the population of Soho had succumbed to Cholera,
-			and the outbreak only subsided as residents fled in fear." (<a
-				href='https://www.arcgis.com/home/item.html?id=4b8616f29eef4e6683f1f14a1345a5ed'>Esri</a>)
+			and the outbreak only subsided as residents fled in fear." - Esri (<a
+				href='https://www.arcgis.com/home/item.html?id=4b8616f29eef4e6683f1f14a1345a5ed'>Read more here.</a>)
 			<br>
 			<br>
 
@@ -356,11 +356,24 @@
 		async function loadLayers() {
 			const choleraDeaths = await fetch(deathsData).then(function (res) {
 				return res.json()
+			}).then(function(data) {
+				return data.features.sort(function(a,b) {
+					return a.properties.Count - b.properties.Count
+				})
 			})
 
 			const pumpsLocations = await fetch(pumpsData).then(function (res) {
 				return res.json()
 			})
+
+			let buffer = L.circle([0,0], {
+				color: 'blue',
+				weight: 1,
+				fillColor: 'blue',
+				fillOpacity: .1,
+				radius: 110,
+				opacity: 0
+			}).addTo(map);
 
 			//load deaths layer
 			const deathsLayer = L.geoJson(choleraDeaths, {
@@ -402,12 +415,18 @@
 			let clickedPump = null
 			const popup = L.popup();
 
+			
+
 			//radius around pump to do standard distance (standard deviation)
 			pumpLayer.on('click', function (i) {
 				if (clickedPump !== i.layer._leaflet_id) {
 					clickedPump = i.layer._leaflet_id
 					const pumpLayer = i.layer
 					const pumpLatlng = i.latlng
+					//console.log(pumpLatlng)
+					buffer.setLatLng([pumpLatlng.lat,pumpLatlng.lng])
+					console.log(buffer.getLatLng())
+					buffer.setRadius(110)
 
 					let deathsInBuffer = []
 					let totalDeath = []
@@ -453,12 +472,13 @@
 							fillOpacity: opacity
 						};
 					})
+					buffer.setRadius(0)
 
 					//close popup
 					popup.closePopup()
 				}
 			})
-
+			
 
 
 		}
